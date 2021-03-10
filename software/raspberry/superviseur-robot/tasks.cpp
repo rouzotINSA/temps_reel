@@ -27,6 +27,9 @@
 #define PRIORITY_TSTARTROBOT 20
 #define PRIORITY_TCAMERA 21
 
+// Time definitions
+#define BATTERY_CHECK_PERIOD 500000000
+
 /*
  * Some remarks:
  * 1- This program is mostly a template. It shows you how to create tasks, semaphore
@@ -396,6 +399,8 @@ void Tasks::WriteInQueue(RT_QUEUE *queue, Message *msg) {
     }
 }
 
+
+
 /**
  * Read a message from a given queue, block if empty
  * @param queue Queue identifier
@@ -415,3 +420,34 @@ Message *Tasks::ReadInQueue(RT_QUEUE *queue) {
     return msg;
 }
 
+
+    /**********************************************************************/
+    /* Our tasks                                                         */
+    /**********************************************************************/
+
+
+void Tasks::CheckBatteryTask(void *arg) {
+    int rs;
+    Message *msAnswer;
+    
+    cout << "Start " << __PRETTY_FUNCTION__ << endl << flush;
+    // Synchronization barrier (waiting that all tasks are starting)
+    rt_sem_p(&sem_barrier, TM_INFINITE);
+    
+    rt_task_set_periodic(NULL, TM_NOW, BATTERY_CHECK_PERIOD);
+    
+    while (1) {
+        rt_task_wait_period(NULL);
+        cout << "Waiting the permission to get the robot mutex";
+        rt_mutex_acquire(&mutex_robotStarted, TM_INFINITE);
+        rs = robotStarted;
+        rt_mutex_release(&mutex_robotStarted);
+        if (rs == 1) {
+            rt_mutex_acquire(&mutex_robot, TM_INFINITE);
+            msAnswer = robot.Write(new Message(MESSAGE_ROBOT_BATTERY_GET));
+            rt_mutex_release(&mutex_robot);
+            WriteInQueue(&q_messageToMon, msAnswer);
+        }
+    }
+    
+}

@@ -151,7 +151,7 @@ public:
     static Message *GoRight() {
         return new Message(MESSAGE_ROBOT_GO_RIGHT);
     }
-
+        if (rs == 1) {
     static Message *GetBattery() {
         return new Message(MESSAGE_ROBOT_BATTERY_GET);
     }

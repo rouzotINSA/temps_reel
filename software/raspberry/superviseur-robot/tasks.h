@@ -67,6 +67,7 @@ private:
     int robotStarted = 0;
     int move = MESSAGE_ROBOT_STOP;
     
+    
     /**********************************************************************/
     /* Tasks                                                              */
     /**********************************************************************/
@@ -76,6 +77,12 @@ private:
     RT_TASK th_openComRobot;
     RT_TASK th_startRobot;
     RT_TASK th_move;
+    
+    /**********************************************************************/
+    /* Our new tasks                                                          */
+    /**********************************************************************/
+    
+    RT_TASK th_battery;
     
     /**********************************************************************/
     /* Mutex                                                              */
@@ -131,6 +138,11 @@ private:
      * @brief Thread handling control of the robot.
      */
     void MoveTask(void *arg);
+    
+    /**
+     * @brief Thread handling battery level verification.
+     */
+    void CheckBatteryTask(void *arg);
     
     /**********************************************************************/
     /* Queue services                                                     */
